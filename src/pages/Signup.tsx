@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useAuth } from '@/contexts/AuthContext';
+import { apiService } from '@/services/api';
 
 const Signup = () => {
   const [fullName, setFullName] = useState('');
@@ -13,9 +15,11 @@ const Signup = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -34,8 +38,24 @@ const Signup = () => {
       return;
     }
 
-    // Simulate successful registration
-    navigate('/dashboard');
+    setLoading(true);
+
+    try {
+      console.log('Creating user account in database...');
+      const response = await apiService.register({
+        name: fullName,
+        email,
+        password
+      });
+      
+      login(response.user, response.token);
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError(err instanceof Error ? err.message : 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -65,6 +85,7 @@ const Signup = () => {
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="John Doe"
                   required
+                  disabled={loading}
                 />
               </div>
 
@@ -77,6 +98,7 @@ const Signup = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
                   required
+                  disabled={loading}
                 />
               </div>
               
@@ -89,6 +111,7 @@ const Signup = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
+                  disabled={loading}
                 />
               </div>
 
@@ -101,6 +124,7 @@ const Signup = () => {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
                   required
+                  disabled={loading}
                 />
               </div>
 
@@ -113,8 +137,9 @@ const Signup = () => {
               <Button 
                 type="submit" 
                 className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700"
+                disabled={loading}
               >
-                Create Account
+                {loading ? 'Creating Account...' : 'Create Account'}
               </Button>
             </form>
 

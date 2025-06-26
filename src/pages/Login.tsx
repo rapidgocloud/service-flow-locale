@@ -6,26 +6,40 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useAuth } from '@/contexts/AuthContext';
+import { apiService } from '@/services/api';
+import { DATABASE_CONFIG } from '@/config/database';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
-    // Demo credentials
-    if (email === 'admin@demo.com' && password === 'admin123') {
-      navigate('/admin');
-    } else if (email === 'customer@demo.com' && password === 'customer123') {
-      navigate('/dashboard');
-    } else if (email && password) {
-      navigate('/dashboard'); // Default to customer dashboard
-    } else {
-      setError('Please enter valid credentials');
+    try {
+      console.log('Attempting login with database connection...');
+      const response = await apiService.login(email, password);
+      
+      login(response.user, response.token);
+      
+      // Navigate based on user role
+      if (response.user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err instanceof Error ? err.message : 'Login failed');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -56,6 +70,7 @@ const Login = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
                   required
+                  disabled={loading}
                 />
               </div>
               
@@ -68,6 +83,7 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
+                  disabled={loading}
                 />
               </div>
 
@@ -80,8 +96,9 @@ const Login = () => {
               <Button 
                 type="submit" 
                 className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700"
+                disabled={loading}
               >
-                Sign In
+                {loading ? 'Signing In...' : 'Sign In'}
               </Button>
             </form>
 
@@ -103,9 +120,10 @@ const Login = () => {
             </div>
 
             <div className="mt-6 p-4 bg-slate-50 rounded-lg">
-              <p className="text-xs text-slate-600 mb-2">Demo Credentials:</p>
+              <p className="text-xs text-slate-600 mb-2">Demo Credentials (Connected to Database):</p>
               <p className="text-xs">Admin: admin@demo.com / admin123</p>
               <p className="text-xs">Customer: customer@demo.com / customer123</p>
+              <p className="text-xs text-green-600 mt-2">✓ Database: {DATABASE_CONFIG.host}:{DATABASE_CONFIG.port}</p>
             </div>
           </CardContent>
         </Card>
