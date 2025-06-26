@@ -23,9 +23,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
   const customerMenuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: '📊' },
-    { name: 'My Services', path: '/services', icon: '⚙️' },
     { name: 'Purchase Service', path: '/purchase', icon: '🛒' },
-    { name: 'Invoices', path: '/invoices', icon: '📄' },
     { name: 'Support', path: '/support', icon: '🎧' },
   ];
 

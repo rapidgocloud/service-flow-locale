@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -119,7 +118,7 @@ const CustomerDashboard = () => {
                   </div>
                 ))}
               </div>
-              <Button variant="outline" className="w-full mt-4" onClick={() => navigate('/invoices')}>
+              <Button variant="outline" className="w-full mt-4">
                 View All Invoices
               </Button>
             </CardContent>
