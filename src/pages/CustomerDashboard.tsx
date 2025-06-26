@@ -3,6 +3,8 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 
 const CustomerDashboard = () => {
@@ -23,6 +25,31 @@ const CustomerDashboard = () => {
     { id: '#TKT-123', subject: 'SSL Certificate Issue', status: 'Open', date: '2024-06-22' },
     { id: '#TKT-122', subject: 'Server Performance', status: 'Resolved', date: '2024-06-20' },
   ];
+
+  // Chart data
+  const usageData = [
+    { month: 'Jan', hosting: 65, vps: 80 },
+    { month: 'Feb', hosting: 72, vps: 85 },
+    { month: 'Mar', hosting: 68, vps: 78 },
+    { month: 'Apr', hosting: 75, vps: 82 },
+    { month: 'May', hosting: 70, vps: 88 },
+    { month: 'Jun', hosting: 78, vps: 92 }
+  ];
+
+  const spendingData = [
+    { month: 'Jan', amount: 39.98 },
+    { month: 'Feb', amount: 39.98 },
+    { month: 'Mar', amount: 39.98 },
+    { month: 'Apr', amount: 39.98 },
+    { month: 'May', amount: 39.98 },
+    { month: 'Jun', amount: 39.98 }
+  ];
+
+  const chartConfig = {
+    hosting: { label: "Web Hosting", color: "#3b82f6" },
+    vps: { label: "VPS", color: "#10b981" },
+    amount: { label: "Amount", color: "#8b5cf6" }
+  };
 
   return (
     <DashboardLayout 
@@ -67,6 +94,52 @@ const CustomerDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-slate-800">1 Open</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Service Usage Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Service Usage</CardTitle>
+              <CardDescription>Monthly resource utilization percentage</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={chartConfig} className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={usageData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Line type="monotone" dataKey="hosting" stroke="var(--color-hosting)" strokeWidth={2} />
+                    <Line type="monotone" dataKey="vps" stroke="var(--color-vps)" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+
+          {/* Spending History */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Spending History</CardTitle>
+              <CardDescription>Monthly billing amounts</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={chartConfig} className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={spendingData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="amount" fill="var(--color-amount)" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
             </CardContent>
           </Card>
         </div>
