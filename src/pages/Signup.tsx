@@ -6,8 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { apiService } from '@/services/api';
+import { Palette } from 'lucide-react';
 
 const Signup = () => {
   const [fullName, setFullName] = useState('');
@@ -18,6 +21,7 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { theme, setTheme } = useTheme();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,17 +63,31 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg mx-auto mb-4"></div>
-          <h1 className="text-2xl font-bold text-slate-800">Create Account</h1>
-          <p className="text-slate-600">Join thousands of satisfied customers</p>
+          <div className="flex items-center justify-center space-x-4 mb-6">
+            <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg"></div>
+            <div className="flex items-center space-x-2">
+              <Palette className="h-4 w-4 text-muted-foreground" />
+              <Select value={theme} onValueChange={(value: 'clean' | 'dark') => setTheme(value)}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="clean">Clean</SelectItem>
+                  <SelectItem value="dark">Dark</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <h1 className="text-2xl font-bold text-foreground">Create Account</h1>
+          <p className="text-muted-foreground">Join thousands of satisfied customers</p>
         </div>
 
-        <Card className="shadow-xl border-0">
+        <Card className="shadow-xl border">
           <CardHeader>
-            <CardTitle>Sign Up</CardTitle>
+            <CardTitle className="text-foreground">Sign Up</CardTitle>
             <CardDescription>
               Create your account to get started with our services
             </CardDescription>
@@ -129,8 +147,8 @@ const Signup = () => {
               </div>
 
               {error && (
-                <Alert className="border-red-200 bg-red-50">
-                  <AlertDescription className="text-red-800">{error}</AlertDescription>
+                <Alert className="border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-800">
+                  <AlertDescription className="text-red-800 dark:text-red-400">{error}</AlertDescription>
                 </Alert>
               )}
 
@@ -144,7 +162,7 @@ const Signup = () => {
             </form>
 
             <div className="mt-6 text-center">
-              <div className="text-sm text-slate-600">
+              <div className="text-sm text-muted-foreground">
                 Already have an account?{' '}
                 <Button 
                   variant="link" 
@@ -162,7 +180,7 @@ const Signup = () => {
           <Button 
             variant="ghost" 
             onClick={() => navigate('/')}
-            className="text-slate-600"
+            className="text-muted-foreground"
           >
             ← Back to Home
           </Button>

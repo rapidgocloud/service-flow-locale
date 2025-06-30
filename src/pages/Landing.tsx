@@ -3,12 +3,15 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import LanguageSelector from '@/components/LanguageSelector';
 import ServiceCard from '@/components/ServiceCard';
-import { Globe, Server, Shield, Database } from 'lucide-react';
+import { Globe, Server, Shield, Database, Palette } from 'lucide-react';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const Landing = () => {
   const [currentLanguage, setCurrentLanguage] = useState('en');
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
   const translations = {
@@ -115,16 +118,28 @@ const Landing = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-50">
+      <header className="bg-card/80 backdrop-blur-sm border-b border-border sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center">
             <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg mr-3"></div>
-            <span className="text-xl font-bold text-slate-800">DigitalServices</span>
+            <span className="text-xl font-bold text-foreground">DigitalServices</span>
           </div>
           
           <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Palette className="h-4 w-4 text-muted-foreground" />
+              <Select value={theme} onValueChange={(value: 'clean' | 'dark') => setTheme(value)}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="clean">Clean</SelectItem>
+                  <SelectItem value="dark">Dark</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <LanguageSelector 
               currentLanguage={currentLanguage}
               onLanguageChange={setCurrentLanguage}
@@ -133,7 +148,7 @@ const Landing = () => {
             <Button 
               variant="ghost" 
               onClick={() => navigate('/login')}
-              className="text-slate-600 hover:text-slate-800"
+              className="text-muted-foreground hover:text-foreground"
             >
               {t.login}
             </Button>
@@ -144,10 +159,10 @@ const Landing = () => {
       {/* Hero Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-slate-800 mb-6 leading-tight">
+          <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
             {t.title}
           </h1>
-          <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             {t.subtitle}
           </p>
           <Button 
@@ -161,7 +176,7 @@ const Landing = () => {
       </section>
 
       {/* Services Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-card">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {services.map((service, index) => (
@@ -178,9 +193,9 @@ const Landing = () => {
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <Card className="bg-gradient-to-r from-cyan-50 to-blue-50 border-cyan-200">
+          <Card className="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-950/20 dark:to-blue-950/20 border-cyan-200 dark:border-cyan-800">
             <CardContent className="p-12">
-              <h2 className="text-3xl font-bold text-slate-800 mb-4">
+              <h2 className="text-3xl font-bold text-foreground mb-4">
                 {t.choosePlan}
               </h2>
               <Button 
