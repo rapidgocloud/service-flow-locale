@@ -2,8 +2,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface ThemeContextType {
-  theme: 'light' | 'dark';
-  toggleTheme: () => void;
+  theme: 'clean' | 'dark';
+  setTheme: (theme: 'clean' | 'dark') => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -17,14 +17,15 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setThemeState] = useState<'clean' | 'dark'>('clean');
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark');
+    const savedTheme = localStorage.getItem('theme') as 'clean' | 'dark' | null;
+    if (savedTheme && (savedTheme === 'clean' || savedTheme === 'dark')) {
+      setThemeState(savedTheme);
+    } else {
+      // Default to clean theme
+      setThemeState('clean');
     }
   }, []);
 
@@ -32,17 +33,19 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.setItem('theme', theme);
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('clean');
     } else {
+      document.documentElement.classList.add('clean');
       document.documentElement.classList.remove('dark');
     }
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  const setTheme = (newTheme: 'clean' | 'dark') => {
+    setThemeState(newTheme);
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );

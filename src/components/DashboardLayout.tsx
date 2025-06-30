@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, LogOut, Sun, Moon, Shield } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Menu, X, LogOut, Shield, Palette } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import LanguageSelector from './LanguageSelector';
 
@@ -20,7 +20,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   onLanguageChange
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
   const customerMenuItems = [
@@ -71,14 +71,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </div>
         
         <div className="flex items-center space-x-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleTheme}
-            className="hover:bg-slate-100 dark:hover:bg-slate-700"
-          >
-            {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-          </Button>
+          <div className="flex items-center space-x-2">
+            <Palette className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+            <Select value={theme} onValueChange={(value: 'clean' | 'dark') => setTheme(value)}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="clean">Clean</SelectItem>
+                <SelectItem value="dark">Dark</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <LanguageSelector 
             currentLanguage={currentLanguage}
             onLanguageChange={onLanguageChange}
