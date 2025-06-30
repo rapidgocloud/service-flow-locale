@@ -17,8 +17,8 @@ interface LanguageSelectorProps {
 
 const languages = [
   { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'pt', name: 'Português', flag: '🇧🇷' },
   { code: 'es', name: 'Español', flag: '🇪🇸' },
+  { code: 'pt', name: 'Português', flag: '🇧🇷' },
 ];
 
 const LanguageSelector: React.FC<LanguageSelectorProps> = ({ 
@@ -34,18 +34,18 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         <Button 
           variant={variant === 'landing' ? 'outline' : 'ghost'} 
           size="sm"
-          className={variant === 'landing' ? 'border-slate-300' : ''}
+          className={variant === 'landing' ? 'border-slate-300 dark:border-slate-600' : ''}
         >
           <Globe className="h-4 w-4 mr-2" />
           {currentLang.flag} {currentLang.name}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-white border border-slate-200 shadow-lg">
+      <DropdownMenuContent align="end" className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg">
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
             onClick={() => onLanguageChange(lang.code)}
-            className="cursor-pointer hover:bg-slate-50"
+            className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
           >
             <span className="mr-2">{lang.flag}</span>
             {lang.name}
