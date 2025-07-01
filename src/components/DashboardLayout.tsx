@@ -36,7 +36,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   const adminMenuItems = [
     { 
@@ -112,6 +112,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
   const isActive = (path: string) => {
     return location.pathname === path;
+  };
+
+  const handleThemeToggle = () => {
+    setTheme(theme === 'clean' ? 'dark' : 'clean');
   };
 
   return (
@@ -204,7 +208,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={toggleTheme}
+                onClick={handleThemeToggle}
                 className={theme === 'dark' ? 'border-slate-600 text-slate-300' : ''}
               >
                 {theme === 'clean' ? '🌙' : '☀️'}
