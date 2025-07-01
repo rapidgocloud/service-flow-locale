@@ -1,150 +1,199 @@
 
-import mysql from 'mysql2/promise';
-import { DATABASE_CONFIG, User, Service, Order, SupportTicket, Invoice } from '@/config/database';
+import { User, Service, Order, SupportTicket, Invoice } from '@/config/database';
+
+// Mock data for development - replace with actual API calls in production
+const mockUsers: User[] = [
+  {
+    id: 1,
+    name: 'John Doe',
+    email: 'john@example.com',
+    password: 'hashed_password_123',
+    role: 'admin',
+    language: 'en',
+    phone: '+1234567890',
+    address: '123 Main St',
+    city: 'New York',
+    state: 'NY',
+    zip_code: '10001',
+    country: 'USA',
+    status: 'active',
+    created_at: new Date('2024-01-01'),
+    updated_at: new Date('2024-01-01')
+  },
+  {
+    id: 2,
+    name: 'Jane Smith',
+    email: 'jane@example.com',
+    password: 'hashed_password_456',
+    role: 'customer',
+    language: 'es',
+    phone: '+1234567891',
+    address: '456 Oak Ave',
+    city: 'Los Angeles',
+    state: 'CA',
+    zip_code: '90210',
+    country: 'USA',
+    status: 'active',
+    created_at: new Date('2024-01-02'),
+    updated_at: new Date('2024-01-02')
+  }
+];
+
+const mockServices: Service[] = [
+  {
+    id: 1,
+    name: 'Web Hosting',
+    description: 'Reliable web hosting service',
+    category: 'hosting',
+    price: 9.99,
+    billing_cycle: 'monthly',
+    features: ['99.9% Uptime', '24/7 Support', 'Free SSL'],
+    status: 'active',
+    created_at: new Date('2024-01-01')
+  },
+  {
+    id: 2,
+    name: 'VPS Server',
+    description: 'Virtual private server hosting',
+    category: 'vps',
+    price: 29.99,
+    billing_cycle: 'monthly',
+    features: ['Full Root Access', 'SSD Storage', 'Scalable'],
+    status: 'active',
+    created_at: new Date('2024-01-01')
+  }
+];
+
+const mockOrders: Order[] = [
+  {
+    id: 1,
+    user_id: 2,
+    service_id: 1,
+    status: 'active',
+    amount: 9.99,
+    billing_cycle: 'monthly',
+    created_at: new Date('2024-01-15'),
+    expires_at: new Date('2024-02-15')
+  }
+];
+
+const mockSupportTickets: SupportTicket[] = [
+  {
+    id: 1,
+    user_id: 2,
+    subject: 'Website down',
+    message: 'My website is not loading properly',
+    status: 'open',
+    priority: 'high',
+    category: 'technical',
+    created_at: new Date('2024-01-10'),
+    updated_at: new Date('2024-01-10')
+  }
+];
 
 class DatabaseService {
-  private pool: mysql.Pool;
-
-  constructor() {
-    this.pool = mysql.createPool({
-      host: DATABASE_CONFIG.host,
-      port: DATABASE_CONFIG.port,
-      user: DATABASE_CONFIG.user,
-      password: DATABASE_CONFIG.password,
-      database: DATABASE_CONFIG.database,
-      waitForConnections: true,
-      connectionLimit: 10,
-      queueLimit: 0,
-      charset: 'utf8mb4'
-    });
-  }
-
   async testConnection(): Promise<{ success: boolean; message: string }> {
-    try {
-      const connection = await this.pool.getConnection();
-      await connection.ping();
-      connection.release();
-      return { success: true, message: 'Database connection successful' };
-    } catch (error) {
-      console.error('Database connection error:', error);
-      return { success: false, message: `Database connection failed: ${(error as Error).message}` };
-    }
+    // Simulate connection test
+    return { success: true, message: 'Mock database connection successful' };
   }
 
   // User methods
   async getAllUsers(): Promise<User[]> {
-    const [rows] = await this.pool.execute(
-      'SELECT id, name, email, role, language, created_at, updated_at FROM users ORDER BY created_at DESC'
-    );
-    return rows as User[];
+    return Promise.resolve([...mockUsers]);
   }
 
   async getUserById(id: number): Promise<User | null> {
-    const [rows] = await this.pool.execute(
-      'SELECT * FROM users WHERE id = ?',
-      [id]
-    );
-    const users = rows as User[];
-    return users.length > 0 ? users[0] : null;
+    const user = mockUsers.find(u => u.id === id);
+    return Promise.resolve(user || null);
   }
 
   async getUserByEmail(email: string): Promise<User | null> {
-    const [rows] = await this.pool.execute(
-      'SELECT * FROM users WHERE email = ?',
-      [email]
-    );
-    const users = rows as User[];
-    return users.length > 0 ? users[0] : null;
+    const user = mockUsers.find(u => u.email === email);
+    return Promise.resolve(user || null);
   }
 
   async createUser(userData: Omit<User, 'id' | 'created_at' | 'updated_at'>): Promise<User> {
-    const [result] = await this.pool.execute(
-      'INSERT INTO users (name, email, password, role, language, phone, address, city, state, zip_code, country, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [userData.name, userData.email, 'hashed_password', userData.role || 'customer', userData.language || 'en', '', '', '', '', '', '', 'active']
-    );
-    const insertResult = result as mysql.ResultSetHeader;
-    return this.getUserById(insertResult.insertId) as Promise<User>;
+    const newUser: User = {
+      ...userData,
+      id: mockUsers.length + 1,
+      created_at: new Date(),
+      updated_at: new Date()
+    };
+    mockUsers.push(newUser);
+    return Promise.resolve(newUser);
   }
 
   async updateUser(id: number, userData: Partial<User>): Promise<User> {
-    const setClause = Object.keys(userData).map(key => `${key} = ?`).join(', ');
-    const values = Object.values(userData);
+    const userIndex = mockUsers.findIndex(u => u.id === id);
+    if (userIndex === -1) {
+      throw new Error('User not found');
+    }
     
-    await this.pool.execute(
-      `UPDATE users SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
-      [...values, id]
-    );
+    mockUsers[userIndex] = {
+      ...mockUsers[userIndex],
+      ...userData,
+      updated_at: new Date()
+    };
     
-    return this.getUserById(id) as Promise<User>;
+    return Promise.resolve(mockUsers[userIndex]);
   }
 
   async deleteUser(id: number): Promise<boolean> {
-    await this.pool.execute('DELETE FROM users WHERE id = ?', [id]);
-    return true;
+    const userIndex = mockUsers.findIndex(u => u.id === id);
+    if (userIndex === -1) {
+      return Promise.resolve(false);
+    }
+    
+    mockUsers.splice(userIndex, 1);
+    return Promise.resolve(true);
   }
 
   // Service methods
   async getAllServices(): Promise<Service[]> {
-    const [rows] = await this.pool.execute(
-      'SELECT * FROM services ORDER BY created_at DESC'
-    );
-    return rows as Service[];
+    return Promise.resolve([...mockServices]);
   }
 
   async createService(serviceData: Omit<Service, 'id' | 'created_at'>): Promise<Service> {
-    const [result] = await this.pool.execute(
-      'INSERT INTO services (name, description, category, price, billing_cycle, features, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [serviceData.name, '', serviceData.category, serviceData.price, serviceData.billing_cycle, JSON.stringify(serviceData.features), serviceData.status]
-    );
-    const insertResult = result as mysql.ResultSetHeader;
-    
-    const [rows] = await this.pool.execute('SELECT * FROM services WHERE id = ?', [insertResult.insertId]);
-    const services = rows as Service[];
-    return services[0];
+    const newService: Service = {
+      ...serviceData,
+      id: mockServices.length + 1,
+      created_at: new Date()
+    };
+    mockServices.push(newService);
+    return Promise.resolve(newService);
   }
 
   // Order methods
   async getAllOrders(): Promise<Order[]> {
-    const [rows] = await this.pool.execute(
-      'SELECT * FROM orders ORDER BY created_at DESC'
-    );
-    return rows as Order[];
+    return Promise.resolve([...mockOrders]);
   }
 
   async getUserOrders(userId: number): Promise<Order[]> {
-    const [rows] = await this.pool.execute(
-      'SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC',
-      [userId]
-    );
-    return rows as Order[];
+    const userOrders = mockOrders.filter(o => o.user_id === userId);
+    return Promise.resolve(userOrders);
   }
 
   async createOrder(orderData: { user_id: number; service_id: number; amount: number }): Promise<Order> {
-    const [result] = await this.pool.execute(
-      'INSERT INTO orders (user_id, service_id, status, amount, billing_cycle, expires_at) VALUES (?, ?, ?, ?, ?, ?)',
-      [orderData.user_id, orderData.service_id, 'pending', orderData.amount, 'monthly', new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)]
-    );
-    const insertResult = result as mysql.ResultSetHeader;
-    
-    const [rows] = await this.pool.execute('SELECT * FROM orders WHERE id = ?', [insertResult.insertId]);
-    const orders = rows as Order[];
-    return orders[0];
+    const newOrder: Order = {
+      ...orderData,
+      id: mockOrders.length + 1,
+      status: 'pending',
+      billing_cycle: 'monthly',
+      created_at: new Date(),
+      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    };
+    mockOrders.push(newOrder);
+    return Promise.resolve(newOrder);
   }
 
   // Support ticket methods
   async getAllSupportTickets(): Promise<SupportTicket[]> {
-    const [rows] = await this.pool.execute(
-      'SELECT * FROM support_tickets ORDER BY created_at DESC'
-    );
-    return rows as SupportTicket[];
+    return Promise.resolve([...mockSupportTickets]);
   }
 
   async getUserSupportTickets(userId: number): Promise<SupportTicket[]> {
-    const [rows] = await this.pool.execute(
-      'SELECT * FROM support_tickets WHERE user_id = ? ORDER BY created_at DESC',
-      [userId]
-    );
-    return rows as SupportTicket[];
+    const userTickets = mockSupportTickets.filter(t => t.user_id === userId);
+    return Promise.resolve(userTickets);
   }
 
   async createSupportTicket(ticketData: {
@@ -154,19 +203,20 @@ class DatabaseService {
     priority: 'low' | 'medium' | 'high';
     category: string;
   }): Promise<SupportTicket> {
-    const [result] = await this.pool.execute(
-      'INSERT INTO support_tickets (user_id, subject, message, priority, status, category) VALUES (?, ?, ?, ?, ?, ?)',
-      [ticketData.user_id, ticketData.subject, ticketData.message, ticketData.priority, 'open', ticketData.category]
-    );
-    const insertResult = result as mysql.ResultSetHeader;
-    
-    const [rows] = await this.pool.execute('SELECT * FROM support_tickets WHERE id = ?', [insertResult.insertId]);
-    const tickets = rows as SupportTicket[];
-    return tickets[0];
+    const newTicket: SupportTicket = {
+      ...ticketData,
+      id: mockSupportTickets.length + 1,
+      status: 'open',
+      created_at: new Date(),
+      updated_at: new Date()
+    };
+    mockSupportTickets.push(newTicket);
+    return Promise.resolve(newTicket);
   }
 
   async close(): Promise<void> {
-    await this.pool.end();
+    // No cleanup needed for mock data
+    return Promise.resolve();
   }
 }
 
