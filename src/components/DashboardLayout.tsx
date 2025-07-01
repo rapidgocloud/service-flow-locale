@@ -1,41 +1,107 @@
+
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Menu, X, LogOut, Shield, Palette } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { useTheme } from '@/contexts/ThemeContext';
-import LanguageSelector from './LanguageSelector';
+import LanguageSelector from '@/components/LanguageSelector';
+import { 
+  LayoutDashboard, 
+  Users, 
+  Package, 
+  ShoppingCart, 
+  HeadphonesIcon, 
+  BarChart3, 
+  CreditCard,
+  Menu,
+  X,
+  LogOut
+} from 'lucide-react';
+import { getTranslation } from '@/utils/translations';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
-  userRole: 'customer' | 'admin';
+  userRole: 'admin' | 'customer';
   currentLanguage: string;
-  onLanguageChange: (lang: string) => void;
+  onLanguageChange: (language: string) => void;
 }
 
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({
-  children,
-  userRole,
-  currentLanguage,
-  onLanguageChange
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ 
+  children, 
+  userRole, 
+  currentLanguage, 
+  onLanguageChange 
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
-
-  const customerMenuItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: '📊' },
-    { name: 'Purchase Service', path: '/purchase', icon: '🛒' },
-    { name: 'Support', path: '/support', icon: '🎧' },
-  ];
+  const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
 
   const adminMenuItems = [
-    { name: 'Dashboard', path: '/admin', icon: '📊' },
-    { name: 'Users', path: '/admin/users', icon: '👥' },
-    { name: 'Orders', path: '/admin/orders', icon: '📦' },
-    { name: 'Services', path: '/admin/services', icon: '⚙️' },
-    { name: 'Support', path: '/admin/support', icon: '🎧' },
-    { name: 'Reports', path: '/admin/reports', icon: '📈' },
+    { 
+      icon: LayoutDashboard, 
+      label: getTranslation(currentLanguage, 'dashboard'), 
+      path: '/admin',
+      key: 'dashboard'
+    },
+    { 
+      icon: Users, 
+      label: getTranslation(currentLanguage, 'userManagement'), 
+      path: '/admin/users',
+      key: 'users'
+    },
+    { 
+      icon: Package, 
+      label: getTranslation(currentLanguage, 'serviceManagement'), 
+      path: '/admin/services',
+      key: 'services'
+    },
+    { 
+      icon: ShoppingCart, 
+      label: getTranslation(currentLanguage, 'orderManagement'), 
+      path: '/admin/orders',
+      key: 'orders'
+    },
+    { 
+      icon: HeadphonesIcon, 
+      label: getTranslation(currentLanguage, 'supportManagement'), 
+      path: '/admin/support',
+      key: 'support'
+    },
+    { 
+      icon: BarChart3, 
+      label: 'Reports', 
+      path: '/admin/reports',
+      key: 'reports'
+    },
+    { 
+      icon: CreditCard, 
+      label: 'Payments', 
+      path: '/admin/payments',
+      key: 'payments'
+    }
+  ];
+
+  const customerMenuItems = [
+    { 
+      icon: LayoutDashboard, 
+      label: getTranslation(currentLanguage, 'dashboard'), 
+      path: '/dashboard',
+      key: 'dashboard'
+    },
+    { 
+      icon: Package, 
+      label: getTranslation(currentLanguage, 'services'), 
+      path: '/purchase',
+      key: 'services'
+    },
+    { 
+      icon: HeadphonesIcon, 
+      label: getTranslation(currentLanguage, 'support'), 
+      path: '/support',
+      key: 'support'
+    }
   ];
 
   const menuItems = userRole === 'admin' ? adminMenuItems : customerMenuItems;
@@ -44,107 +110,121 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     navigate('/');
   };
 
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors">
-      {/* Header */}
-      <header className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 px-4 lg:px-6 h-16 flex items-center justify-between sticky top-0 z-40">
-        <div className="flex items-center">
+    <div className={`min-h-screen ${theme === 'dark' ? 'dark bg-slate-900' : 'bg-slate-50'}`}>
+      {/* Mobile menu overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      } ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} border-r`}>
+        
+        {/* Header */}
+        <div className={`flex items-center justify-between p-4 border-b ${theme === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}>
+          <h1 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
+            {getTranslation(currentLanguage, 'adminPanel')}
+          </h1>
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="lg:hidden mr-2 hover:bg-slate-100 dark:hover:bg-slate-700"
+            className="lg:hidden"
+            onClick={() => setSidebarOpen(false)}
           >
-            <Menu className="h-5 w-5" />
-          </Button>
-          <div className="flex items-center space-x-3">
-            {userRole === 'admin' && (
-              <div className="flex items-center space-x-2">
-                <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                <span className="text-sm font-medium text-blue-600 dark:text-blue-400">ADMIN</span>
-              </div>
-            )}
-            <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-200">
-              {userRole === 'admin' ? 'Admin Panel' : 'Dashboard'}
-            </h1>
-          </div>
-        </div>
-        
-        <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-2">
-            <Palette className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-            <Select value={theme} onValueChange={(value: 'clean' | 'dark') => setTheme(value)}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="clean">Clean</SelectItem>
-                <SelectItem value="dark">Dark</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <LanguageSelector 
-            currentLanguage={currentLanguage}
-            onLanguageChange={onLanguageChange}
-          />
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={handleLogout}
-            className="hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Logout
+            <X className="h-4 w-4" />
           </Button>
         </div>
-      </header>
 
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className={`
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
-          lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm border-r border-slate-200 dark:border-slate-700
-          transform transition-transform duration-300 ease-in-out lg:transform-none shadow-lg lg:shadow-none
-        `}>
-          <div className="flex items-center justify-between p-4 lg:hidden border-b border-slate-200 dark:border-slate-700">
-            <span className="text-lg font-semibold text-slate-800 dark:text-slate-200">Menu</span>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => setSidebarOpen(false)}
-              className="hover:bg-slate-100 dark:hover:bg-slate-700"
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
-          
-          <nav className="mt-8 lg:mt-4 px-2">
-            {menuItems.map((item) => (
-              <button
-                key={item.path}
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-2">
+          {menuItems.map((item) => {
+            const IconComponent = item.icon;
+            const active = isActive(item.path);
+            
+            return (
+              <Button
+                key={item.key}
+                variant={active ? 'default' : 'ghost'}
+                className={`w-full justify-start ${
+                  active 
+                    ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                    : theme === 'dark' 
+                      ? 'text-slate-300 hover:text-white hover:bg-slate-700' 
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}
                 onClick={() => {
                   navigate(item.path);
                   setSidebarOpen(false);
                 }}
-                className="w-full flex items-center px-4 py-3 text-left text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100 transition-all duration-200 rounded-lg mb-1 group"
               >
-                <span className="mr-3 text-lg group-hover:scale-110 transition-transform duration-200">{item.icon}</span>
-                <span className="font-medium">{item.name}</span>
-              </button>
-            ))}
-          </nav>
-        </aside>
+                <IconComponent className="mr-3 h-4 w-4" />
+                {item.label}
+              </Button>
+            );
+          })}
+        </nav>
 
-        {/* Overlay for mobile */}
-        {sidebarOpen && (
-          <div 
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
+        {/* Footer */}
+        <div className={`p-4 border-t ${theme === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}>
+          <Button
+            variant="ghost"
+            className={`w-full justify-start ${theme === 'dark' ? 'text-slate-300 hover:text-white hover:bg-slate-700' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}`}
+            onClick={handleLogout}
+          >
+            <LogOut className="mr-3 h-4 w-4" />
+            Logout
+          </Button>
+        </div>
+      </div>
 
-        {/* Main Content */}
-        <main className="flex-1 lg:ml-0 min-h-screen">
+      {/* Main content */}
+      <div className="lg:ml-64">
+        {/* Top bar */}
+        <div className={`${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} border-b px-4 py-3`}>
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="lg:hidden"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+            
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleTheme}
+                className={theme === 'dark' ? 'border-slate-600 text-slate-300' : ''}
+              >
+                {theme === 'clean' ? '🌙' : '☀️'}
+              </Button>
+              
+              <LanguageSelector
+                currentLanguage={currentLanguage}
+                onLanguageChange={onLanguageChange}
+                variant="header"
+              />
+              
+              <Badge variant="outline" className={theme === 'dark' ? 'border-slate-600 text-slate-300' : ''}>
+                {userRole === 'admin' ? 'Admin' : 'Customer'}
+              </Badge>
+            </div>
+          </div>
+        </div>
+
+        {/* Page content */}
+        <main className="p-0">
           {children}
         </main>
       </div>

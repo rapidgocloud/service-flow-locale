@@ -13,6 +13,16 @@ export const translations = {
     confirm: 'Confirm',
     close: 'Close',
     loading: 'Loading...',
+    success: 'Success',
+    error: 'Error',
+    name: 'Name',
+    email: 'Email',
+    phone: 'Phone',
+    address: 'Address',
+    city: 'City',
+    state: 'State',
+    zipCode: 'ZIP Code',
+    country: 'Country',
     
     // Dashboard
     dashboard: 'Dashboard',
@@ -32,6 +42,8 @@ export const translations = {
     services: 'Services',
     totalSpent: 'Total Spent',
     actions: 'Actions',
+    personalInfo: 'Personal Information',
+    addressInfo: 'Address Information',
     
     // Services
     serviceManagement: 'Service Management',
@@ -43,6 +55,9 @@ export const translations = {
     monthlyRevenue: 'Monthly Revenue',
     configure: 'Configure',
     features: 'Features',
+    price: 'Price',
+    category: 'Category',
+    description: 'Description',
     
     // Orders
     orderManagement: 'Order Management',
@@ -68,6 +83,7 @@ export const translations = {
     priority: 'Priority',
     lastUpdate: 'Last Update',
     reply: 'Reply',
+    message: 'Message',
     
     // Status
     active: 'Active',
@@ -77,11 +93,20 @@ export const translations = {
     resolved: 'Resolved',
     open: 'Open',
     closed: 'Closed',
+    draft: 'Draft',
     
     // Priority
     high: 'High',
     medium: 'Medium',
     low: 'Low',
+    
+    // Payments
+    paymentManagement: 'Payment Management',
+    stripeConfiguration: 'Stripe Configuration',
+    
+    // Form validation
+    required: 'This field is required',
+    invalidEmail: 'Please enter a valid email address',
   },
   es: {
     // Common
@@ -96,6 +121,16 @@ export const translations = {
     confirm: 'Confirmar',
     close: 'Cerrar',
     loading: 'Cargando...',
+    success: 'Éxito',
+    error: 'Error',
+    name: 'Nombre',
+    email: 'Correo electrónico',
+    phone: 'Teléfono',
+    address: 'Dirección',
+    city: 'Ciudad',
+    state: 'Estado',
+    zipCode: 'Código postal',
+    country: 'País',
     
     // Dashboard
     dashboard: 'Panel de Control',
@@ -115,6 +150,8 @@ export const translations = {
     services: 'Servicios',
     totalSpent: 'Total Gastado',
     actions: 'Acciones',
+    personalInfo: 'Información Personal',
+    addressInfo: 'Información de Dirección',
     
     // Services
     serviceManagement: 'Gestión de Servicios',
@@ -126,6 +163,9 @@ export const translations = {
     monthlyRevenue: 'Ingresos Mensuales',
     configure: 'Configurar',
     features: 'Características',
+    price: 'Precio',
+    category: 'Categoría',
+    description: 'Descripción',
     
     // Orders
     orderManagement: 'Gestión de Pedidos',
@@ -151,6 +191,7 @@ export const translations = {
     priority: 'Prioridad',
     lastUpdate: 'Última Actualización',
     reply: 'Responder',
+    message: 'Mensaje',
     
     // Status
     active: 'Activo',
@@ -160,11 +201,20 @@ export const translations = {
     resolved: 'Resuelto',
     open: 'Abierto',
     closed: 'Cerrado',
+    draft: 'Borrador',
     
     // Priority
     high: 'Alta',
     medium: 'Media',
     low: 'Baja',
+    
+    // Payments
+    paymentManagement: 'Gestión de Pagos',
+    stripeConfiguration: 'Configuración de Stripe',
+    
+    // Form validation
+    required: 'Este campo es obligatorio',
+    invalidEmail: 'Por favor ingrese un correo electrónico válido',
   },
   pt: {
     // Common
@@ -179,6 +229,16 @@ export const translations = {
     confirm: 'Confirmar',
     close: 'Fechar',
     loading: 'Carregando...',
+    success: 'Sucesso',
+    error: 'Erro',
+    name: 'Nome',
+    email: 'E-mail',
+    phone: 'Telefone',
+    address: 'Endereço',
+    city: 'Cidade',
+    state: 'Estado',
+    zipCode: 'CEP',
+    country: 'País',
     
     // Dashboard
     dashboard: 'Painel',
@@ -198,6 +258,8 @@ export const translations = {
     services: 'Serviços',
     totalSpent: 'Total Gasto',
     actions: 'Ações',
+    personalInfo: 'Informações Pessoais',
+    addressInfo: 'Informações de Endereço',
     
     // Services
     serviceManagement: 'Gestão de Serviços',
@@ -209,6 +271,9 @@ export const translations = {
     monthlyRevenue: 'Receita Mensal',
     configure: 'Configurar',
     features: 'Recursos',
+    price: 'Preço',
+    category: 'Categoria',
+    description: 'Descrição',
     
     // Orders
     orderManagement: 'Gestão de Pedidos',
@@ -234,6 +299,7 @@ export const translations = {
     priority: 'Prioridade',
     lastUpdate: 'Última Atualização',
     reply: 'Responder',
+    message: 'Mensagem',
     
     // Status
     active: 'Ativo',
@@ -243,11 +309,20 @@ export const translations = {
     resolved: 'Resolvido',
     open: 'Aberto',
     closed: 'Fechado',
+    draft: 'Rascunho',
     
     // Priority
     high: 'Alta',
     medium: 'Média',
     low: 'Baixa',
+    
+    // Payments
+    paymentManagement: 'Gestão de Pagamentos',
+    stripeConfiguration: 'Configuração do Stripe',
+    
+    // Form validation
+    required: 'Este campo é obrigatório',
+    invalidEmail: 'Por favor, insira um endereço de e-mail válido',
   }
 };
 
