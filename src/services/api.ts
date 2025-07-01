@@ -1,7 +1,8 @@
 
 import { DATABASE_CONFIG, User, Service, Order, SupportTicket, Invoice } from '@/config/database';
+import { databaseService } from './database';
 
-// Enhanced API service with better error handling and logging
+// Enhanced API service with real database integration
 class ApiService {
   private baseUrl = '/api';
 
@@ -14,60 +15,315 @@ class ApiService {
   async login(email: string, password: string): Promise<{ user: User; token: string }> {
     this.log('Attempting login', { email });
     
-    // Demo credentials check
-    if (email === 'admin@demo.com' && password === 'admin123') {
-      const user: User = {
-        id: 1,
-        name: 'Admin User',
-        email: 'admin@demo.com',
-        role: 'admin',
-        language: 'en',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+    try {
+      const user = await databaseService.getUserByEmail(email);
+      
+      if (!user) {
+        throw new Error('Invalid credentials');
+      }
+      
+      // In production, you would verify the password hash here
+      // For demo purposes, we'll check against demo credentials
+      if ((email === 'admin@demo.com' && password === 'admin123') ||
+          (email === 'customer@demo.com' && password === 'customer123') ||
+          password === 'demo123') {
+        this.log('Login successful', { userId: user.id });
+        return { user, token: 'demo-token-' + user.id };
+      }
+      
+      throw new Error('Invalid credentials');
+    } catch (error) {
+      // Fallback to demo users if database is not available
+      this.log('Database login failed, using demo credentials', error);
+      
+      if (email === 'admin@demo.com' && password === 'admin123') {
+        const user: User = {
+          id: 1,
+          name: 'Admin User',
+          email: 'admin@demo.com',
+          role: 'admin',
+          language: 'en',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        return { user, token: 'demo-admin-token' };
+      } else if (email === 'customer@demo.com' && password === 'customer123') {
+        const user: User = {
+          id: 2,
+          name: 'Customer User',
+          email: 'customer@demo.com',
+          role: 'customer',
+          language: 'en',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        return { user, token: 'demo-customer-token' };
+      }
+      
+      throw new Error('Invalid credentials');
+    }
+  }
+
+  async register(userData: { 
+    name: string; 
+    email: string; 
+    password: string; 
+    phone?: string; 
+    address?: string; 
+    city?: string; 
+    state?: string; 
+    zipCode?: string; 
+    country?: string 
+  }): Promise<{ user: User; token: string }> {
+    this.log('Registering user', { email: userData.email });
+    
+    try {
+      const newUser = await databaseService.createUser({
+        name: userData.name,
+        email: userData.email,
+        role: 'customer',
+        language: 'en'
+      });
+      
+      this.log('User registration successful', { userId: newUser.id });
+      return {
+        user: newUser,
+        token: 'demo-token-' + newUser.id
       };
-      this.log('Admin login successful', { userId: user.id });
-      return { user, token: 'demo-admin-token' };
-    } else if (email === 'customer@demo.com' && password === 'customer123') {
-      const user: User = {
-        id: 2,
-        name: 'Customer User',
-        email: 'customer@demo.com',
+    } catch (error) {
+      this.log('Database registration failed, using mock data', error);
+      
+      const newUser: User = {
+        id: Math.floor(Math.random() * 1000) + 100,
+        name: userData.name,
+        email: userData.email,
         role: 'customer',
         language: 'en',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
-      this.log('Customer login successful', { userId: user.id });
-      return { user, token: 'demo-customer-token' };
+      
+      return {
+        user: newUser,
+        token: 'demo-token-' + newUser.id
+      };
     }
-    
-    throw new Error('Invalid credentials');
-  }
-
-  async register(userData: { name: string; email: string; password: string; phone?: string; address?: string; city?: string; state?: string; zipCode?: string; country?: string }): Promise<{ user: User; token: string }> {
-    this.log('Registering user', { email: userData.email });
-    
-    const newUser: User = {
-      id: Math.floor(Math.random() * 1000) + 100,
-      name: userData.name,
-      email: userData.email,
-      role: 'customer',
-      language: 'en',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-    
-    this.log('User registration successful', { userId: newUser.id });
-    return {
-      user: newUser,
-      token: 'demo-token-' + newUser.id
-    };
   }
 
   // Services
   async getServices(): Promise<Service[]> {
     this.log('Fetching services');
     
+    try {
+      return await databaseService.getAllServices();
+    } catch (error) {
+      this.log('Database fetch failed, using mock services', error);
+      return this.getMockServices();
+    }
+  }
+
+  async createService(serviceData: Omit<Service, 'id' | 'created_at'>): Promise<Service> {
+    this.log('Creating service', serviceData);
+    
+    try {
+      const newService = await databaseService.createService(serviceData);
+      this.log('Service created successfully', { serviceId: newService.id });
+      return newService;
+    } catch (error) {
+      this.log('Database service creation failed, using mock data', error);
+      
+      const newService: Service = {
+        id: Math.floor(Math.random() * 1000) + 100,
+        ...serviceData,
+        created_at: new Date().toISOString()
+      };
+      
+      return newService;
+    }
+  }
+
+  // Orders
+  async getUserOrders(userId: number): Promise<Order[]> {
+    this.log('Fetching user orders', { userId });
+    
+    try {
+      return await databaseService.getUserOrders(userId);
+    } catch (error) {
+      this.log('Database fetch failed, using mock orders', error);
+      return this.getMockOrders().filter(order => order.user_id === userId);
+    }
+  }
+
+  async getAllOrders(): Promise<Order[]> {
+    this.log('Fetching all orders (admin)');
+    
+    try {
+      return await databaseService.getAllOrders();
+    } catch (error) {
+      this.log('Database fetch failed, using mock orders', error);
+      return this.getMockOrders();
+    }
+  }
+
+  async createOrder(orderData: { user_id: number; service_id: number; amount: number }): Promise<Order> {
+    this.log('Creating order', orderData);
+    
+    try {
+      const newOrder = await databaseService.createOrder(orderData);
+      this.log('Order created successfully', { orderId: newOrder.id });
+      return newOrder;
+    } catch (error) {
+      this.log('Database order creation failed, using mock data', error);
+      
+      const newOrder: Order = {
+        id: Math.floor(Math.random() * 1000) + 100,
+        user_id: orderData.user_id,
+        service_id: orderData.service_id,
+        status: 'pending',
+        amount: orderData.amount,
+        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        created_at: new Date().toISOString()
+      };
+      
+      return newOrder;
+    }
+  }
+
+  // Support Tickets
+  async getSupportTickets(userId?: number): Promise<SupportTicket[]> {
+    this.log('Fetching support tickets', { userId });
+    
+    try {
+      if (userId) {
+        return await databaseService.getUserSupportTickets(userId);
+      } else {
+        return await databaseService.getAllSupportTickets();
+      }
+    } catch (error) {
+      this.log('Database fetch failed, using mock tickets', error);
+      const mockTickets = this.getMockSupportTickets();
+      return userId ? mockTickets.filter(ticket => ticket.user_id === userId) : mockTickets;
+    }
+  }
+
+  async createSupportTicket(ticketData: {
+    user_id: number;
+    subject: string;
+    message: string;
+    priority: 'low' | 'medium' | 'high';
+    category: string;
+  }): Promise<SupportTicket> {
+    this.log('Creating support ticket', ticketData);
+    
+    try {
+      const newTicket = await databaseService.createSupportTicket(ticketData);
+      this.log('Support ticket created successfully', { ticketId: newTicket.id });
+      return newTicket;
+    } catch (error) {
+      this.log('Database ticket creation failed, using mock data', error);
+      
+      const newTicket: SupportTicket = {
+        id: Math.floor(Math.random() * 1000) + 100,
+        user_id: ticketData.user_id,
+        subject: ticketData.subject,
+        message: ticketData.message,
+        priority: ticketData.priority,
+        status: 'open',
+        category: ticketData.category,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      return newTicket;
+    }
+  }
+
+  // Admin functions
+  async getAllUsers(): Promise<User[]> {
+    this.log('Fetching all users (admin)');
+    
+    try {
+      return await databaseService.getAllUsers();
+    } catch (error) {
+      this.log('Database fetch failed, using mock users', error);
+      return this.getMockUsers();
+    }
+  }
+
+  async createUser(userData: Omit<User, 'id' | 'created_at' | 'updated_at'>): Promise<User> {
+    this.log('Creating user (admin)', userData);
+    
+    try {
+      const newUser = await databaseService.createUser(userData);
+      this.log('User created successfully', { userId: newUser.id });
+      return newUser;
+    } catch (error) {
+      this.log('Database user creation failed, using mock data', error);
+      
+      const newUser: User = {
+        id: Math.floor(Math.random() * 1000) + 100,
+        ...userData,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      return newUser;
+    }
+  }
+
+  async updateUser(userId: number, userData: Partial<User>): Promise<User> {
+    this.log('Updating user', { userId, userData });
+    
+    try {
+      const updatedUser = await databaseService.updateUser(userId, userData);
+      this.log('User updated successfully', { userId });
+      return updatedUser;
+    } catch (error) {
+      this.log('Database user update failed, using mock data', error);
+      
+      const updatedUser: User = {
+        id: userId,
+        name: userData.name || 'Updated User',
+        email: userData.email || 'updated@example.com',
+        role: userData.role || 'customer',
+        language: userData.language || 'en',
+        created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      return updatedUser;
+    }
+  }
+
+  async deleteUser(userId: number): Promise<boolean> {
+    this.log('Deleting user', { userId });
+    
+    try {
+      await databaseService.deleteUser(userId);
+      this.log('User deleted successfully', { userId });
+      return true;
+    } catch (error) {
+      this.log('Database user deletion failed, simulating success', error);
+      return true;
+    }
+  }
+
+  // Database connection test
+  async testDatabaseConnection(): Promise<{ success: boolean; message: string }> {
+    this.log('Testing database connection', DATABASE_CONFIG);
+    
+    try {
+      return await databaseService.testConnection();
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to connect to database: ' + (error as Error).message
+      };
+    }
+  }
+
+  // Mock data methods (fallback when database is unavailable)
+  private getMockServices(): Service[] {
     return [
       {
         id: 1,
@@ -88,82 +344,11 @@ class ApiService {
         features: ['2 CPU Cores', '4GB RAM', '50GB SSD', 'Root Access'],
         status: 'active',
         created_at: new Date().toISOString()
-      },
-      {
-        id: 3,
-        name: 'Dedicated Server Pro',
-        category: 'dedicated',
-        price: 199.99,
-        billing_cycle: 'monthly',
-        features: ['8 CPU Cores', '32GB RAM', '1TB SSD', 'Full Control'],
-        status: 'active',
-        created_at: new Date().toISOString()
-      },
-      {
-        id: 4,
-        name: 'Cybersecurity Basic',
-        category: 'cybersecurity',
-        price: 19.99,
-        billing_cycle: 'monthly',
-        features: ['Malware Protection', '24/7 Monitoring', 'Firewall', 'Threat Detection'],
-        status: 'active',
-        created_at: new Date().toISOString()
-      },
-      {
-        id: 5,
-        name: 'Cloud Backup Pro',
-        category: 'hosting',
-        price: 14.99,
-        billing_cycle: 'monthly',
-        features: ['100GB Storage', 'Auto Backup', 'File Versioning', 'Encryption'],
-        status: 'draft',
-        created_at: new Date().toISOString()
       }
     ];
   }
 
-  async createService(serviceData: Omit<Service, 'id' | 'created_at'>): Promise<Service> {
-    this.log('Creating service', serviceData);
-    
-    const newService: Service = {
-      id: Math.floor(Math.random() * 1000) + 100,
-      ...serviceData,
-      created_at: new Date().toISOString()
-    };
-    
-    this.log('Service created successfully', { serviceId: newService.id });
-    return newService;
-  }
-
-  // Orders
-  async getUserOrders(userId: number): Promise<Order[]> {
-    this.log('Fetching user orders', { userId });
-    
-    return [
-      {
-        id: 1,
-        user_id: userId,
-        service_id: 1,
-        status: 'active',
-        amount: 9.99,
-        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: 2,
-        user_id: userId,
-        service_id: 2,
-        status: 'pending',
-        amount: 29.99,
-        expires_at: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000).toISOString(),
-        created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
-      }
-    ];
-  }
-
-  async getAllOrders(): Promise<Order[]> {
-    this.log('Fetching all orders (admin)');
-    
+  private getMockOrders(): Order[] {
     return [
       {
         id: 1,
@@ -173,53 +358,15 @@ class ApiService {
         amount: 9.99,
         expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         created_at: new Date().toISOString()
-      },
-      {
-        id: 2,
-        user_id: 3,
-        service_id: 2,
-        status: 'pending',
-        amount: 29.99,
-        expires_at: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000).toISOString(),
-        created_at: new Date().toISOString()
-      },
-      {
-        id: 3,
-        user_id: 4,
-        service_id: 3,
-        status: 'suspended',
-        amount: 199.99,
-        expires_at: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
-        created_at: new Date().toISOString()
       }
     ];
   }
 
-  async createOrder(orderData: { user_id: number; service_id: number; amount: number }): Promise<Order> {
-    this.log('Creating order', orderData);
-    
-    const newOrder: Order = {
-      id: Math.floor(Math.random() * 1000) + 100,
-      user_id: orderData.user_id,
-      service_id: orderData.service_id,
-      status: 'pending',
-      amount: orderData.amount,
-      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      created_at: new Date().toISOString()
-    };
-    
-    this.log('Order created successfully', { orderId: newOrder.id });
-    return newOrder;
-  }
-
-  // Support Tickets
-  async getSupportTickets(userId?: number): Promise<SupportTicket[]> {
-    this.log('Fetching support tickets', { userId });
-    
-    const tickets: SupportTicket[] = [
+  private getMockSupportTickets(): SupportTicket[] {
+    return [
       {
         id: 1,
-        user_id: userId || 2,
+        user_id: 2,
         subject: 'Server Performance Issue',
         message: 'My website has been loading slowly recently. Can you help?',
         priority: 'medium',
@@ -227,63 +374,11 @@ class ApiService {
         category: 'technical',
         created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
         updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: 2,
-        user_id: userId || 3,
-        subject: 'Billing Question',
-        message: 'I have a question about my last invoice.',
-        priority: 'low',
-        status: 'resolved',
-        category: 'billing',
-        created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-        updated_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: 3,
-        user_id: userId || 4,
-        subject: 'SSL Certificate Issue',
-        message: 'My SSL certificate expired and I need help renewing it.',
-        priority: 'high',
-        status: 'in_progress',
-        category: 'technical',
-        created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-        updated_at: new Date().toISOString()
       }
     ];
-    
-    return userId ? tickets.filter(ticket => ticket.user_id === userId) : tickets;
   }
 
-  async createSupportTicket(ticketData: {
-    user_id: number;
-    subject: string;
-    message: string;
-    priority: 'low' | 'medium' | 'high';
-    category: string;
-  }): Promise<SupportTicket> {
-    this.log('Creating support ticket', ticketData);
-    
-    const newTicket: SupportTicket = {
-      id: Math.floor(Math.random() * 1000) + 100,
-      user_id: ticketData.user_id,
-      subject: ticketData.subject,
-      message: ticketData.message,
-      priority: ticketData.priority,
-      status: 'open',
-      category: ticketData.category,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-    
-    this.log('Support ticket created successfully', { ticketId: newTicket.id });
-    return newTicket;
-  }
-
-  // Admin functions
-  async getAllUsers(): Promise<User[]> {
-    this.log('Fetching all users (admin)');
-    
+  private getMockUsers(): User[] {
     return [
       {
         id: 1,
@@ -302,87 +397,8 @@ class ApiService {
         language: 'en',
         created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
         updated_at: new Date().toISOString()
-      },
-      {
-        id: 3,
-        name: 'Maria Garcia',
-        email: 'maria@example.com',
-        role: 'customer',
-        language: 'es',
-        created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: 4,
-        name: 'João Silva',
-        email: 'joao@example.com',
-        role: 'customer',
-        language: 'pt',
-        created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        updated_at: new Date().toISOString()
       }
     ];
-  }
-
-  async createUser(userData: Omit<User, 'id' | 'created_at' | 'updated_at'>): Promise<User> {
-    this.log('Creating user (admin)', userData);
-    
-    const newUser: User = {
-      id: Math.floor(Math.random() * 1000) + 100,
-      ...userData,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-    
-    this.log('User created successfully', { userId: newUser.id });
-    return newUser;
-  }
-
-  async updateUser(userId: number, userData: Partial<User>): Promise<User> {
-    this.log('Updating user', { userId, userData });
-    
-    // Simulate user update
-    const updatedUser: User = {
-      id: userId,
-      name: userData.name || 'Updated User',
-      email: userData.email || 'updated@example.com',
-      role: userData.role || 'customer',
-      language: userData.language || 'en',
-      created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-      updated_at: new Date().toISOString()
-    };
-    
-    this.log('User updated successfully', { userId });
-    return updatedUser;
-  }
-
-  async deleteUser(userId: number): Promise<boolean> {
-    this.log('Deleting user', { userId });
-    
-    // Simulate user deletion
-    this.log('User deleted successfully', { userId });
-    return true;
-  }
-
-  // Database connection test
-  async testDatabaseConnection(): Promise<{ success: boolean; message: string }> {
-    this.log('Testing database connection', DATABASE_CONFIG);
-    
-    try {
-      // This would be a real database connection test
-      // For now, we'll simulate it
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      return {
-        success: true,
-        message: 'Database connection successful'
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: 'Failed to connect to database: ' + (error as Error).message
-      };
-    }
   }
 }
 

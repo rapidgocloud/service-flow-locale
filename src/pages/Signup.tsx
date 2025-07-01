@@ -17,6 +17,12 @@ const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [zipCode, setZipCode] = useState('');
+  const [country, setCountry] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -28,7 +34,7 @@ const Signup = () => {
     setError('');
 
     if (!fullName || !email || !password || !confirmPassword) {
-      setError('Please fill in all fields');
+      setError('Please fill in all required fields');
       return;
     }
 
@@ -49,7 +55,13 @@ const Signup = () => {
       const response = await apiService.register({
         name: fullName,
         email,
-        password
+        password,
+        phone,
+        address,
+        city,
+        state,
+        zipCode,
+        country
       });
       
       login(response.user, response.token);
@@ -64,7 +76,7 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-2xl">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-4 mb-6">
             <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg"></div>
@@ -94,54 +106,132 @@ const Signup = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name *</Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="John Doe"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password *</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+
               <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
+                <Label htmlFor="phone">Phone</Label>
                 <Input
-                  id="fullName"
+                  id="phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+1 (555) 123-4567"
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="address">Address</Label>
+                <Input
+                  id="address"
                   type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="John Doe"
-                  required
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="123 Main St"
                   disabled={loading}
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  required
-                  disabled={loading}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  disabled={loading}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    placeholder="New York"
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="state">State</Label>
+                  <Input
+                    id="state"
+                    type="text"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                    placeholder="NY"
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="zipCode">ZIP Code</Label>
+                  <Input
+                    id="zipCode"
+                    type="text"
+                    value={zipCode}
+                    onChange={(e) => setZipCode(e.target.value)}
+                    placeholder="10001"
+                    disabled={loading}
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="country">Country</Label>
                 <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
+                  id="country"
+                  type="text"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                  placeholder="United States"
                   disabled={loading}
                 />
               </div>
